@@ -19,7 +19,7 @@ class CreateOrdersTable extends Migration
             $table->integer('customer_id');
             $table->tinyInteger('status'); //0 = pending; 1 = paid; ->set delivered_by; 2 = cancelled;
             $table->integer('author_id');
-            $table->integer('delivered_by');
+            $table->integer('delivered_by')->nullable();
             $table->timestamps();
         });
     }

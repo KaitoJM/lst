@@ -20,7 +20,7 @@ class CreateCustomersTable extends Migration
             $table->string('email', 100);
             $table->string('phone', 20)->nullable();
             $table->text('address')->nullable();
-            $table->tinyInteger('gender'); // 0 = female; 1 = male
+            $table->tinyInteger('gender')->default(0); // 0 = female; 1 = male
             $table->timestamps();
         });
     }
