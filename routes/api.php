@@ -28,12 +28,14 @@ Route::get('get-current-session', function() {
             },
             'customer',
             'author'
-        ]);
+        ])->withCount('items');
     }])->orderBy('start_date', 'DESC')->first();
 
+    // return $current_session;
     $formatted = [
         'id' => $current_session->id,
         'start_date' => $current_session->start_date,
+        'name' => $current_session->name,
         'orders' => collect($current_session->orders)->map(function($order) {
             return [
                 'id' => $order->id,
@@ -43,6 +45,11 @@ Route::get('get-current-session', function() {
                 'customer_lname' => $order->customer->lname,
                 'author_fname' => $order->author->fname,
                 'author_lname' => $order->author->lname,
+                'items_count' => $order->items_count,
+                'products_count' => $order->items->sum('qty'),
+                'total' => $order->items->sum(function($t){ 
+                    return $t->qty * $t->price; 
+                }),
                 'items' => collect($order->items)->map(function($item) {
                     return [
                         'id' => $item->id,
@@ -62,5 +69,20 @@ Route::get('get-current-session', function() {
 });
 
 Route::get('get-sessions', function() {
-    return App\Session::orderBy('start_date', 'DESC')->get()->toArray();
+    return App\Session::orderBy('start_date', 'DESC')->get();
 });
+
+Route::get('get-sessions-products/{session_id}', function($session_id) {
+    $product_options = App\SessionProduct::where('session_id', $session_id)->with('product')->get();
+
+    return collect($product_options)->map(function($option) {
+        return [
+            'id' => $option->id,
+            'product_id' => $option->product_id,
+            'product_name' => $option->product->name,
+            'price' => $option->product->price,
+            'quantity' => $option->quantity
+        ];
+    });
+});
+
