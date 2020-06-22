@@ -86,3 +86,85 @@ Route::get('get-sessions-products/{session_id}', function($session_id) {
     });
 });
 
+Route::get('get-customers', function() {
+    return App\Customer::all();
+});
+
+Route::get('get-users', function() {
+    return App\User::all();
+});
+
+Route::post('submit-order', function(Request $request) {
+    // return $request->all();
+    $error = 0;
+    $message = '';
+    $customer = null;
+
+    if ($request->has('customer_id') && $request->input('customer_id')) {
+        $customer = App\Customer::find($request->input('customer_id'));
+
+        if (!$customer) {
+            $error++;
+            $message = 'Invalid customer.';
+        }
+    } else {
+        $customer = new App\Customer;
+
+        $customer->fname = $request->input('customer_fname');
+        $customer->lname = $request->input('customer_lname');
+        $customer->email = $request->input('customer_email');
+        $customer->phone = $request->input('customer_phone');
+        $customer->address = $request->input('customer_address');
+        $customer->addgenderress = $request->input('customer_gender');
+
+        $save = $customer->save();
+
+        if ($save) {
+            $error++;
+            $message = 'Invalid customer.';
+        }
+    }
+
+    if ($customer) {
+        $order = new App\Order;
+
+        $order->session_id = $request->input('session_id');
+        $order->customer_id = $customer->id;
+        $order->author_id = $request->input('author_id');
+        $order->status = 0;
+
+        $save = $order->save();
+
+        if ($save) {
+            $items = json_decode($request->input('items'));
+
+            if (is_array($items) && count($items)) {
+                foreach($items as $item) {
+                    $orderItem = new App\OrderItem;
+
+                    $orderItem->order_id = $order->id;
+                    $orderItem->session_product_id = $item->session_product_id;
+                    $orderItem->qty = $item->qty;
+                    $orderItem->price = $item->price;
+                
+                    $orderItem->save();
+                }
+            } else {
+                $error++;
+                $message = 'No order items selected.';
+            }
+        } else {
+            $error++;
+            $message = 'Invalid order.';
+        }
+    } else {
+        $error++;
+        $message = 'Invalid customer.';
+    }
+
+    return [
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
+
