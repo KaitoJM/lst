@@ -28,7 +28,7 @@ Route::get('get-current-session', function() {
             },
             'customer',
             'author'
-        ])->withCount('items');
+        ])->withCount('items')->orderBy('created_at', 'DESC');
     }])->orderBy('start_date', 'DESC')->first();
 
     // return $current_session;
