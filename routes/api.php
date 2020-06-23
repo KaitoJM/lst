@@ -108,21 +108,21 @@ Route::post('submit-order', function(Request $request) {
             $message = 'Invalid customer.';
         }
     } else {
-        $customer = new App\Customer;
+        // $customer = new App\Customer;
 
-        $customer->fname = $request->input('customer_fname');
-        $customer->lname = $request->input('customer_lname');
-        $customer->email = $request->input('customer_email');
-        $customer->phone = $request->input('customer_phone');
-        $customer->address = $request->input('customer_address');
-        $customer->addgenderress = $request->input('customer_gender');
+        // $customer->fname = $request->input('customer_fname');
+        // $customer->lname = $request->input('customer_lname');
+        // $customer->email = $request->input('customer_email');
+        // $customer->phone = $request->input('customer_phone');
+        // $customer->address = $request->input('customer_address');
+        // $customer->gender = $request->input('customer_gender');
 
-        $save = $customer->save();
+        // $save = $customer->save();
 
-        if ($save) {
+        // if ($save) {
             $error++;
             $message = 'Invalid customer.';
-        }
+        // }
     }
 
     if ($customer) {
@@ -168,3 +168,38 @@ Route::post('submit-order', function(Request $request) {
     ];
 });
 
+Route::post('submit-customer', function(Request $request) {
+    // return $request->all();
+    $id = 0;
+    $error = 0;
+    $message = '';
+
+    $customer = new App\Customer;
+
+    if ($request->has('fname')) {
+        $customer->fname = $request->input('fname');
+        $customer->lname = $request->input('lname');
+        $customer->email = $request->input('email');
+        $customer->phone = $request->input('phone');
+        $customer->address = $request->input('address');
+        $customer->gender = $request->input('gender');
+    
+        $saved = $customer->save();
+
+        if (!$saved) {
+            $error++;
+            $message = 'invalid customer info.';
+        } else {
+            $id = $customer->id;
+        }
+    } else {
+        $error++;
+        $message = 'No data received.';
+    }
+    
+    return [
+        'id'  => $id,
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
