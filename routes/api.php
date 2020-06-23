@@ -18,8 +18,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('get-current-session', function() {
-    $current_session = App\Session::where('status', 1)->with(['orders' => function($q) {
+function getSession($id = null) {
+    $session = App\Session::with(['orders' => function($q) {
         return $q->with([
             'items' => function($item) {
                 return $item->with(['session_product' => function($sess_prod) {
@@ -29,14 +29,23 @@ Route::get('get-current-session', function() {
             'customer',
             'author'
         ])->withCount('items')->orderBy('created_at', 'DESC');
-    }])->orderBy('start_date', 'DESC')->first();
+    }]);
 
-    // return $current_session;
+    if ($id) {
+        $session->where('id', $id);
+        $session = $session->get();
+    } else {
+        $session->where('status', 1);
+        $session = $session->first();
+    }
+
+    
+    // return $session;
     $formatted = [
-        'id' => $current_session->id,
-        'start_date' => $current_session->start_date,
-        'name' => $current_session->name,
-        'orders' => collect($current_session->orders)->map(function($order) {
+        'id' => $session->id,
+        'start_date' => $session->start_date,
+        'name' => $session->name,
+        'orders' => collect($session->orders)->map(function($order) {
             return [
                 'id' => $order->id,
                 'customer_id' => $order->customer_id,
@@ -66,10 +75,17 @@ Route::get('get-current-session', function() {
     ];
 
     return $formatted;
+}
+
+Route::get('get-current-session', function() {
+    return getSession();
 });
 
 Route::get('get-sessions', function() {
-    return App\Session::orderBy('start_date', 'DESC')->get();
+    return [
+        'preparation' => App\Session::where('status', 0)->orderBy('start_date', 'ASC')->get(),
+        'ended' => App\Session::where('status', 2)->orderBy('start_date', 'DESC')->get(),
+    ];
 });
 
 Route::get('get-sessions-products/{session_id}', function($session_id) {
