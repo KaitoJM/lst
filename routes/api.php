@@ -65,6 +65,7 @@ function getSession($id = null) {
                         'product' => $item->session_product->product->name,
                         'image' => $item->session_product->product->image,
                         'product_id' => $item->session_product->product->id,
+                        'session_product_id' => $item->session_product->id,
                         'price' => $item->price,
                         'qty' => $item->qty,
                         'total' => $item->qty * $item->price,
@@ -215,6 +216,65 @@ Route::post('submit-customer', function(Request $request) {
     
     return [
         'id'  => $id,
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
+
+Route::post('delete-order', function(Request $request) {
+    // return $request->all();
+    $error = 0;
+    $message = '';
+
+    $customer = new App\Customer;
+
+    if ($request->has('order_id')) {
+        $deleted = App\Order::where('id', $request->input('order_id'))->delete();
+
+        if ($deleted) {
+            App\OrderItem::where('order_id', $request->input('order_id'))->delete();
+        } else {
+            $error++;
+            $message = 'Invalid order.';
+        }
+    } else {
+        $error++;
+        $message = 'No data received.';
+    }
+    
+    return [
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
+
+Route::post('update-order', function(Request $request) {
+    $error = 0;
+    $message = '';
+
+    if ($request->has('order_id') && $request->input('order_id') && $request->has('items')) {
+        $items = json_decode($request->input('items'));
+
+        if (count($items)) {
+            App\OrderItem::where('order_id', $request->input('order_id'))->delete();
+
+            foreach($items as $item) {
+                $new_item = new App\OrderItem;
+    
+                $new_item->order_id = $request->input('order_id');
+                $new_item->session_product_id = $item->session_product_id;
+                $new_item->qty = $item->qty;
+                $new_item->price = $item->price;
+    
+                $new_item->save();
+            }
+        }
+    } else {
+        $error++;
+        $message = 'No data received.';
+    }
+
+    return [
         'err' => $error,
         'msg' => $message,
     ];
