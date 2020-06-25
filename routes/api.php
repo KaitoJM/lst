@@ -30,7 +30,7 @@ function getSession($id = null, $status = 1, $strict_current = false) {
             'author'
         ])->withCount('items')->orderBy('created_at', 'DESC');
     }])->with(['products' => function($sess_prod) {
-        $sess_prod->with('product');
+        $sess_prod->with('product', 'orderItems');
     }]);
 
     if ($id) {
@@ -103,6 +103,12 @@ function getSession($id = null, $status = 1, $strict_current = false) {
                         'image' => $product->product->image,
                         'price' => $product->product->price,
                         'qty' => $product->qty,
+                        'total_order_qty' => 0, //total product stock in a session
+                        'total_order_qty_ordered' => $product->orderItems->sum('qty'), //total product reserve/ordered in a session
+                        'total_order_qty_paid' => 0, //total product paid in a session
+                        'total_order_amount' => $product->qty * $product->product->price, //total product amount in a session
+                        'total_order_ordered' => $product->orderItems->sum('qty') * $product->product->price, //total product amount ordered in a session
+                        'total_order_paid' => 0, //total product amount paid in a session
                     ];
                 })
             ];
@@ -150,6 +156,12 @@ function getSession($id = null, $status = 1, $strict_current = false) {
                     'image' => $product->product->image,
                     'price' => $product->product->price,
                     'qty' => $product->qty,
+                    'total_order_qty' => 0, //total product stock in a session
+                    'total_order_qty_ordered' => $product->orderItems->sum('qty'), //total product reserve/ordered in a session
+                    'total_order_qty_paid' => 0, //total product paid in a session
+                    'total_order_amount' => $product->qty * $product->product->price, //total product amount in a session
+                    'total_order_ordered' => $product->orderItems->sum('qty') * $product->product->price, //total product amount ordered in a session
+                    'total_order_paid' => 0, //total product amount paid in a session
                 ];
             })
         ];

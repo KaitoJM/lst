@@ -9,4 +9,8 @@ class SessionProduct extends Model
     public function product() {
         return $this->hasOne('App\Product', 'id', 'product_id');
     }
+
+    public function orderItems() {
+        return $this->hasMany('App\OrderItem');
+    }
 }
