@@ -18,7 +18,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-function getSession($id = null) {
+function getSession($id = null, $status = 1) {
     $session = App\Session::with(['orders' => function($q) {
         return $q->with([
             'items' => function($item) {
@@ -29,51 +29,110 @@ function getSession($id = null) {
             'customer',
             'author'
         ])->withCount('items')->orderBy('created_at', 'DESC');
+    }])->with(['products' => function($sess_prod) {
+        $sess_prod->with('product');
     }]);
 
     if ($id) {
         $session->where('id', $id);
         $session = $session->get();
-    } else {
+    } else if ($status == 1) {
         $session->where('status', 1);
         $session = $session->first();
+    } else if ($status == 2) {
+        $session->where('status', 2);
+        $session->orderBy('start_date', 'DESC');
+        $session = $session->get();
+    } else {
+        $session->where('status', 0);
+        $session->orderBy('start_date', 'ASC');
+        $session = $session->get();
     }
 
-    
     // return $session;
-    $formatted = [
-        'id' => $session->id,
-        'start_date' => $session->start_date,
-        'name' => $session->name,
-        'orders' => collect($session->orders)->map(function($order) {
+
+    if (!isset($session->id)) {
+        $formatted = collect($session)->map( function($session) {
             return [
-                'id' => $order->id,
-                'customer_id' => $order->customer_id,
-                'author_id' => $order->author_id,
-                'customer_fname' => $order->customer->fname,
-                'customer_lname' => $order->customer->lname,
-                'author_fname' => $order->author->fname,
-                'author_lname' => $order->author->lname,
-                'items_count' => $order->items_count,
-                'products_count' => $order->items->sum('qty'),
-                'total' => $order->items->sum(function($t){ 
-                    return $t->qty * $t->price; 
-                }),
-                'items' => collect($order->items)->map(function($item) {
+                'id' => $session->id,
+                'start_date' => $session->start_date,
+                'name' => $session->name,
+                'orders' => collect($session->orders)->map(function($order) {
                     return [
-                        'id' => $item->id,
-                        'product' => $item->session_product->product->name,
-                        'image' => $item->session_product->product->image,
-                        'product_id' => $item->session_product->product->id,
-                        'session_product_id' => $item->session_product->id,
-                        'price' => $item->price,
-                        'qty' => $item->qty,
-                        'total' => $item->qty * $item->price,
+                        'id' => $order->id,
+                        'customer_id' => $order->customer_id,
+                        'author_id' => $order->author_id,
+                        'customer_fname' => $order->customer->fname,
+                        'customer_lname' => $order->customer->lname,
+                        'author_fname' => $order->author->fname,
+                        'author_lname' => $order->author->lname,
+                        'items_count' => $order->items_count,
+                        'products_count' => $order->items->sum('qty'),
+                        'total' => $order->items->sum(function($t){ 
+                            return $t->qty * $t->price; 
+                        }),
+                        'items' => collect($order->items)->map(function($item) {
+                            return [
+                                'id' => $item->id,
+                                'product' => $item->session_product->product->name,
+                                'image' => $item->session_product->product->image,
+                                'product_id' => $item->session_product->product->id,
+                                'session_product_id' => $item->session_product->id,
+                                'price' => $item->price,
+                                'qty' => $item->qty,
+                                'total' => $item->qty * $item->price,
+                            ];
+                        }),
+                    ];
+                }),
+                'products' => collect($session->products)->map(function($product) {
+                    return [
+                        'id' => $product->id,
+                        'product_id' => $product->product_id,
+                        'product' => $product->product->name,
+                        'image' => $product->product->image,
+                        'price' => $product->product->price,
+                        'qty' => $product->qty,
                     ];
                 })
             ];
-        })
-    ];
+        });
+    } else {
+        $formatted = [
+            'id' => $session->id,
+            'start_date' => $session->start_date,
+            'name' => $session->name,
+            'orders' => collect($session->orders)->map(function($order) {
+                return [
+                    'id' => $order->id,
+                    'customer_id' => $order->customer_id,
+                    'author_id' => $order->author_id,
+                    'customer_fname' => $order->customer->fname,
+                    'customer_lname' => $order->customer->lname,
+                    'author_fname' => $order->author->fname,
+                    'author_lname' => $order->author->lname,
+                    'items_count' => $order->items_count,
+                    'products_count' => $order->items->sum('qty'),
+                    'total' => $order->items->sum(function($t){ 
+                        return $t->qty * $t->price; 
+                    }),
+                    'items' => collect($order->items)->map(function($item) {
+                        return [
+                            'id' => $item->id,
+                            'product' => $item->session_product->product->name,
+                            'image' => $item->session_product->product->image,
+                            'product_id' => $item->session_product->product->id,
+                            'session_product_id' => $item->session_product->id,
+                            'price' => $item->price,
+                            'qty' => $item->qty,
+                            'total' => $item->qty * $item->price,
+                        ];
+                    })
+                ];
+            })
+        ];
+    }
+    // return $session;
 
     return $formatted;
 }
@@ -84,8 +143,8 @@ Route::get('get-current-session', function() {
 
 Route::get('get-sessions', function() {
     return [
-        'preparation' => App\Session::where('status', 0)->orderBy('start_date', 'ASC')->get(),
-        'ended' => App\Session::where('status', 2)->orderBy('start_date', 'DESC')->get(),
+        'preparation' => getSession(null, 0),
+        'ended' => getSession(null, 2),
     ];
 });
 
@@ -226,8 +285,6 @@ Route::post('delete-order', function(Request $request) {
     $error = 0;
     $message = '';
 
-    $customer = new App\Customer;
-
     if ($request->has('order_id')) {
         $deleted = App\Order::where('id', $request->input('order_id'))->delete();
 
@@ -282,4 +339,99 @@ Route::post('update-order', function(Request $request) {
 
 Route::get('get-products', function() {
     return App\Product::all();
+});
+
+Route::post('add-session', function(Request $request) {
+    // return $request->all();
+    $error = 0;
+    $message = '';
+
+    if ($request->has('name') && $request->has('products') && !empty($request->input('products'))) {
+        $products = json_decode($request->input('products'));
+
+        $session = new App\Session;
+
+        if ($request->has('id') && $request->input('id')) {
+            $session = App\Session::find($request->input('id'));
+        }
+
+        $session->name = $request->input('name');
+        $session->start_date = $request->input('start_date');
+        $session->status = 0;
+
+        $session->save();
+
+        if (count($products)) {
+            $products_exist = array_filter(collect($products)->pluck('id')->toArray());
+            $products_to_delete = App\SessionProduct::whereNotIn('id', $products_exist)->where('session_id', $session->id)->get();
+
+            #delete non used session product
+            if (count($products_to_delete)) {
+                foreach($products_to_delete as $prod) {
+                    App\OrderItem::where('session_product_id', $prod->id)->delete();
+                    $prod->delete();
+                }
+            }
+
+            foreach($products as $product) {
+                $sessionProduct = new App\SessionProduct;
+
+                if ($product->id) {
+                    $sessionProduct = App\SessionProduct::find($product->id);
+                }
+                
+                $sessionProduct->session_id = $session->id;
+                $sessionProduct->product_id = $product->product_id;
+                $sessionProduct->quantity   = $product->qty;
+
+                $sessionProduct->save();
+            }
+        } else {
+            $error++;
+            $message = 'Invalid entry.';
+        }
+    } else {
+        $error++;
+        $message = 'Invalid entry.';
+    }
+
+    return [
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
+
+Route::post('delete-session', function(Request $request) {
+    // return $request->all();
+    $error = 0;
+    $message = '';
+
+    if ($request->has('session_id')) {
+        $deleted = App\Session::where('id', $request->input('session_id'))->delete();
+
+        if ($deleted) {
+            App\SessionProduct::where('session_id', $request->input('session_id'))->delete();
+
+            $orders = App\Order::where('session_id', $request->input('session_id'))->get();
+            
+            if (count($orders)) {
+                foreach ($orders as $order) {
+                    App\OrderItem::where('order_id', $order->id)->delete();
+                    $order->delete();
+                }
+            }
+
+        } else {
+            $error++;
+            $message = 'Invalid session.';
+        }
+    } else {
+        $error++;
+        $message = 'No data received.';
+    }
+    
+    return [
+        'err' => $error,
+        'msg' => $message,
+    ];
 });
