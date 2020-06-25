@@ -18,7 +18,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-function getSession($id = null, $status = 1) {
+function getSession($id = null, $status = 1, $strict_current = false) {
     $session = App\Session::with(['orders' => function($q) {
         return $q->with([
             'items' => function($item) {
@@ -37,8 +37,16 @@ function getSession($id = null, $status = 1) {
         $session->where('id', $id);
         $session = $session->get();
     } else if ($status == 1) {
-        $session->where('status', 1);
-        $session = $session->first();
+        $check_session = App\Session::where('status', 1)->get();
+
+        if (count($check_session) == 0 && !$strict_current) {
+            $session->where('status', 0);
+            $session->orderBy('start_date', 'ASC');
+            $session = $session->first();
+        } else {
+            $session->where('status', 1);
+            $session = $session->first();
+        }
     } else if ($status == 2) {
         $session->where('status', 2);
         $session->orderBy('start_date', 'DESC');
@@ -56,6 +64,8 @@ function getSession($id = null, $status = 1) {
             return [
                 'id' => $session->id,
                 'start_date' => $session->start_date,
+                'end_date' => $session->end_date,
+                'status' => $session->status,
                 'name' => $session->name,
                 'orders' => collect($session->orders)->map(function($order) {
                     return [
@@ -101,6 +111,8 @@ function getSession($id = null, $status = 1) {
         $formatted = [
             'id' => $session->id,
             'start_date' => $session->start_date,
+            'end_date' => $session->end_date,
+            'status' => $session->status,
             'name' => $session->name,
             'orders' => collect($session->orders)->map(function($order) {
                 return [
@@ -129,6 +141,16 @@ function getSession($id = null, $status = 1) {
                         ];
                     })
                 ];
+            }),
+            'products' => collect($session->products)->map(function($product) {
+                return [
+                    'id' => $product->id,
+                    'product_id' => $product->product_id,
+                    'product' => $product->product->name,
+                    'image' => $product->product->image,
+                    'price' => $product->product->price,
+                    'qty' => $product->qty,
+                ];
             })
         ];
     }
@@ -139,6 +161,10 @@ function getSession($id = null, $status = 1) {
 
 Route::get('get-current-session', function() {
     return getSession();
+});
+
+Route::get('get-current-session/current-only', function() {
+    return getSession(null, 1, true);
 });
 
 Route::get('get-sessions', function() {
@@ -430,6 +456,53 @@ Route::post('delete-session', function(Request $request) {
         $message = 'No data received.';
     }
     
+    return [
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
+
+Route::post('open-session', function(Request $request) {
+    $error = 0;
+    $message = '';
+
+    if ($request->has('session_id') && $request->input('session_id')) {
+        #check for open sessions
+        $check = App\Session::where('status', 1)->get();
+
+        if (!count($check)) {
+            $session = App\Session::where('id', $request->input('session_id'))->first();
+            $session->status = 1;
+            $session->save();
+        } else {
+            $error++;
+            $message = 'There are still open sessions found. Please close it to continue.';
+        }
+    } else {
+        $error++;
+        $message = 'Invalid session revieved.';
+    }
+
+    return [
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
+
+Route::post('close-session', function(Request $request) {
+    $error = 0;
+    $message = '';
+    
+    if ($request->has('session_id') && $request->input('session_id')) {
+        $session = App\Session::where('id', $request->input('session_id'))->first();
+        $session->status = 2;
+        $session->end_date = date('Y-m-d');
+        $session->save();
+    } else {
+        $error++;
+        $message = 'Invalid session revieved.';
+    }
+
     return [
         'err' => $error,
         'msg' => $message,
