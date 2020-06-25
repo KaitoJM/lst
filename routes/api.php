@@ -279,3 +279,7 @@ Route::post('update-order', function(Request $request) {
         'msg' => $message,
     ];
 });
+
+Route::get('get-products', function() {
+    return App\Product::all();
+});
