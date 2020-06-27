@@ -81,6 +81,7 @@ function getSession($id = null, $status = 1, $strict_current = false) {
                         'total' => $order->items->sum(function($t){ 
                             return $t->qty * $t->price; 
                         }),
+                        'status' => $order->status,
                         'items' => collect($order->items)->map(function($item) {
                             return [
                                 'id' => $item->id,
@@ -133,6 +134,7 @@ function getSession($id = null, $status = 1, $strict_current = false) {
                     'total' => $order->items->sum(function($t){ 
                         return $t->qty * $t->price; 
                     }),
+                    'status' => $order->status,
                     'items' => collect($order->items)->map(function($item) {
                         return [
                             'id' => $item->id,
@@ -513,6 +515,54 @@ Route::post('close-session', function(Request $request) {
         $message = 'Invalid session revieved.';
     }
 
+    return [
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
+
+Route::post('pay-order', function(Request $request) {
+    $error = 0;
+    $message = '';
+
+    if ($request->has('order_id') && $request->input('order_id')) {
+        $order = App\Order::find($request->input('order_id'));
+        $order->status = 1;
+        $save = $order->save();
+
+        if (!$save) {
+            $error++;
+            $message = 'This order was already paid.';
+        }
+    } else {
+        $error++;
+        $message = 'Invalid order.';
+    }
+    
+    return [
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
+
+Route::post('unpay-order', function(Request $request) {
+    $error = 0;
+    $message = '';
+
+    if ($request->has('order_id') && $request->input('order_id')) {
+        $order = App\Order::find($request->input('order_id'));
+        $order->status = 0;
+        $save = $order->save();
+
+        if (!$save) {
+            $error++;
+            $message = 'This order was already paid.';
+        }
+    } else {
+        $error++;
+        $message = 'Invalid order.';
+    }
+    
     return [
         'err' => $error,
         'msg' => $message,
