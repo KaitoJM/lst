@@ -26,25 +26,25 @@ class DatabaseSeeder extends Seeder
                 'fname' => 'John Mark',
                 'lname' => 'Mancol',
                 'email' => 'johnmarkmancol@gmail.com',
-                'password' => Hash::make('123123123'),
+                'password' => md5('123123123'),
             ],
             [
                 'fname' => 'Ma. Fatima',
                 'lname' => 'Guinte',
                 'email' => 'fatimaguinte@gmail.com',
-                'password' => Hash::make('123123123'),
+                'password' => md5('123123123'),
             ],
             [
                 'fname' => 'Gerlyn',
                 'lname' => 'Delantar',
                 'email' => 'delantargerlyn12@gmail.com',
-                'password' => Hash::make('123123123'),
+                'password' => md5('123123123'),
             ],
             [
                 'fname' => 'Ranie',
                 'lname' => 'Monforte',
                 'email' => 'ranie.nis@nwtf.org.ph',
-                'password' => Hash::make('123123123'),
+                'password' => md5('123123123'),
             ],
         ];
 

@@ -575,11 +575,17 @@ Route::post('get-session-by-product', function(Request $request) {
     $message = '';
 
     if ($request->has('session_id') && $request->input('session_id')) {
-        $session = App\Session::with(['products' => function($p) {
-            $p->with('product')->with(['orderItems' => function($item) {
+        $session = App\Session::with(['products' => function($p) use ($request) {
+            $p->with('product')->with(['orderItems' => function($item) use ($request){
                 $item->with(['order' => function($order) {
                     $order->with('customer');
                 }]);
+
+                if ($request->has('user_id') && $request->input('user_id')) {
+                    $item->whereHas('order', function($order) use ($request) {
+                        $order->where('author_id', $request->input('user_id'));
+                    });
+                }
             }]);
         }])->where('id', $request->input('session_id'))->first();
        
@@ -594,6 +600,34 @@ Route::post('get-session-by-product', function(Request $request) {
 
     return [
         'session' => $session,
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
+
+Route::post('login', function(Request $request) {
+    $user_id = 0;
+    $error = 0;
+    $message = '';
+
+    if ($request->has('username') && $request->input('username') && $request->has('password') && $request->input('password')) {
+        $check = App\User::where('email', $request->input('username'))
+            ->where('password', md5($request->input('password'))
+        )->first();
+        
+        if ($check) {
+            $user_id = $check->id;
+        } else {
+            $error++;
+            $message = 'Invalid user. Try again.';
+        }
+    } else {
+        $error++;
+        $message = 'Invalid user. Try again.';
+    }
+
+    return [
+        'user_id' => $user_id,
         'err' => $error,
         'msg' => $message,
     ];
