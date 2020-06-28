@@ -568,3 +568,33 @@ Route::post('unpay-order', function(Request $request) {
         'msg' => $message,
     ];
 });
+
+Route::post('get-session-by-product', function(Request $request) {
+    $session = null;
+    $error = 0;
+    $message = '';
+
+    if ($request->has('session_id') && $request->input('session_id')) {
+        $session = App\Session::with(['products' => function($p) {
+            $p->with('product')->with(['orderItems' => function($item) {
+                $item->with(['order' => function($order) {
+                    $order->with('customer');
+                }]);
+            }]);
+        }])->where('id', $request->input('session_id'))->first();
+       
+        if (!$session) {
+            $error++;
+            $message = 'No result.';
+        }
+    } else {
+        $error++;
+        $message = 'Invalid order.';
+    }
+
+    return [
+        'session' => $session,
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
