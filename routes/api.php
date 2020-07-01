@@ -632,3 +632,47 @@ Route::post('login', function(Request $request) {
         'msg' => $message,
     ];
 });
+
+Route::get('deliveries', function() {
+    $deliveries = [];
+    $error = 0;
+    $message = '';
+
+    $check_session = App\Session::where('status', 1)->first();
+
+    if ($check_session) {
+        $session = $check_session;
+
+        $users = App\User::all();
+
+        if (count($users)) {
+            foreach($users as $user) {
+                $session = App\Session::with(['products' => function($p) use ($user) {
+                    $p->with('product')->with(['orderItems' => function($item) use ($user){
+                        $item->with(['order' => function($order) {
+                            $order->with('customer');
+                        }]);
+        
+                        $item->whereHas('order', function($order) use ($user) {
+                            $order->where('author_id', $user->id);
+                        });
+                    }]);
+                }])->where('id', $session->id)->first();
+
+                array_push($deliveries, ['session' => $session, 'user' => $user]);
+            }
+        } else {
+            $error++;
+            $message = 'There are no users yet.';
+        }
+    } else {
+        $error++;
+        $message = 'There are no active sessions yet.';
+    }
+
+    return [
+        'deliveries' => $deliveries,
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
