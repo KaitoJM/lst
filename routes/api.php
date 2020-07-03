@@ -119,6 +119,7 @@ function getSession($id = null, $status = 1, $strict_current = false) {
             'id' => $session->id,
             'start_date' => $session->start_date,
             'end_date' => $session->end_date,
+            'expense' => $session->expense,
             'status' => $session->status,
             'name' => $session->name,
             'orders' => collect($session->orders)->map(function($order) {
@@ -395,6 +396,7 @@ Route::post('add-session', function(Request $request) {
         }
 
         $session->name = $request->input('name');
+        $session->expense = (float)$request->input('expense');
         $session->start_date = $request->input('start_date');
         $session->status = 0;
 
