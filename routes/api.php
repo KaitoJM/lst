@@ -609,7 +609,7 @@ Route::post('get-session-by-product', function(Request $request) {
 });
 
 Route::post('login', function(Request $request) {
-    $user_id = 0;
+    $user = null;
     $error = 0;
     $message = '';
 
@@ -619,7 +619,7 @@ Route::post('login', function(Request $request) {
         )->first();
         
         if ($check) {
-            $user_id = $check->id;
+            $user = $check;
         } else {
             $error++;
             $message = 'Invalid user. Try again.';
@@ -630,7 +630,7 @@ Route::post('login', function(Request $request) {
     }
 
     return [
-        'user_id' => $user_id,
+        'user' => $user,
         'err' => $error,
         'msg' => $message,
     ];
@@ -678,4 +678,20 @@ Route::get('deliveries', function() {
         'err' => $error,
         'msg' => $message,
     ];
+});
+
+Route::get('transactions', function(Request $request) {
+    $users = App\User::with(['orders' => function($order) {
+        $order->with(['items' => function($item) {
+            $item->with(['session_product' => function($session_product) {
+                $session_product->with('product');
+            }]);
+        }]);
+    }])->whereHas('orders', function($order) use ($request){
+        $order->where('session_id', $request->input('session_id'));
+    })->with(['transactions' => function($transaction) use ($request) {
+        $transaction->where('session_id', $request->input('session_id'));
+    }])->get();
+    
+    return $users;
 });
