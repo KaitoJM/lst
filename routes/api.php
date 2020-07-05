@@ -681,7 +681,8 @@ Route::get('deliveries', function() {
 });
 
 Route::get('transactions', function(Request $request) {
-    $users = App\User::with(['orders' => function($order) {
+    $users = App\User::with(['orders' => function($order) use ($request) {
+        $order->where('session_id', $request->input('session_id'));
         $order->with(['items' => function($item) {
             $item->with(['session_product' => function($session_product) {
                 $session_product->with('product');
@@ -694,4 +695,36 @@ Route::get('transactions', function(Request $request) {
     }])->get();
     
     return $users;
+});
+
+Route::post('add-transaction', function(Request $request) {
+    $id = 0;
+    $error = 0;
+    $message = '';
+
+    if (($request->has('user_id') && $request->input('user_id')) && ($request->has('session_id') && $request->input('session_id'))) {
+        $transaction = new App\Transaction();
+
+        $transaction->session_id = $request->input('session_id');
+        $transaction->from = $request->input('user_id');
+        $transaction->amount = $request->input('amount');
+
+        $save = $transaction->save();
+
+        if (!$save) {
+            $error++;
+            $message = 'Error while saving transaction. Please Try again.';
+        } else {
+            $id = $transaction->id;
+        }
+    } else {
+        $error++;
+        $message = 'Invalid Transaction.';
+    }
+    
+    return [
+        'id' => $id,
+        'err' => $error,
+        'msg' => $message,
+    ];
 });
