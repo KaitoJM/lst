@@ -699,6 +699,7 @@ Route::get('transactions', function(Request $request) {
 
 Route::post('add-transaction', function(Request $request) {
     $id = 0;
+    $date = '';
     $error = 0;
     $message = '';
 
@@ -716,6 +717,7 @@ Route::post('add-transaction', function(Request $request) {
             $message = 'Error while saving transaction. Please Try again.';
         } else {
             $id = $transaction->id;
+            $date = $transaction->created_at;
         }
     } else {
         $error++;
@@ -724,6 +726,7 @@ Route::post('add-transaction', function(Request $request) {
     
     return [
         'id' => $id,
+        'date' => $date,
         'err' => $error,
         'msg' => $message,
     ];
