@@ -13,6 +13,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::group(['middleware' => ['admin'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
+    Route::get('/user', ['uses' => 'Admin\UserController@index', 'as' => 'user']);
+    Route::get('/user-edit/{id}', ['uses' => 'Admin\UserController@edit', 'as' => 'user.edit']);
+    Route::post('/update-user/{id}', ['uses' => 'Admin\UserController@updateUser', 'as' => 'user.update']);
+});
+
+
+
 Route::get('/', function () {
     return view('welcome');
 });
