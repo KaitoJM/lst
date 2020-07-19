@@ -718,6 +718,10 @@ Route::post('add-transaction', function(Request $request) {
         } else {
             $id = $transaction->id;
             $date = $transaction->created_at;
+
+            $money_update = App\Money::find(1);
+            $money_update->cash_on_hand =  (float) $money_update->cash_on_hand + (float) $transaction->amount;
+            $money_update->save();
         }
     } else {
         $error++;
@@ -730,4 +734,32 @@ Route::post('add-transaction', function(Request $request) {
         'err' => $error,
         'msg' => $message,
     ];
+});
+
+Route::post('release-money', function(Request $request) {
+    $error = 0;
+    $message = '';
+
+    if ($request->has('amount') && $request->input('amount')) {
+        $ins = new App\Release();
+
+        $ins->amount = $request->input('amount');
+        $inserted = $ins->save();
+
+        if ($inserted) {
+            $money_update = App\Money::find(1);
+            $money_update->cash_on_hand =  (float) $money_update->cash_on_hand - (float) $ins->amount;
+            $money_update->save();
+        }
+
+    }
+
+    return [
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
+
+Route::get('get-money', function(Request $request) {
+    return App\Money::find(1);
 });
