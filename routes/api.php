@@ -712,7 +712,7 @@ Route::post('add-transaction', function(Request $request) {
         $transaction->from = $request->input('user_id');
         $transaction->amount = $request->input('amount');
 
-        if ($type) {
+        if ($type == 'true') {
             $transaction->payment_type = 'bank';
         }
 
@@ -769,7 +769,7 @@ Route::post('remove-transaction', function(Request $request) {
             } else {
                 $money_update->cash_on_hand =  (float) $money_update->cash_on_hand - (float) $amount;
             }
-            
+
             $money_update->save();
         }
     } else {
