@@ -723,7 +723,7 @@ Route::post('add-transaction', function(Request $request) {
             $message = 'Error while saving transaction. Please Try again.';
         } else {
             $id = $transaction->id;
-            $date = $transaction->created_at;
+            $date = date('M. d, Y', strtotime($transaction->created_at));
 
             $money_update = App\Money::find(1);
             if ($type) {
@@ -741,6 +741,43 @@ Route::post('add-transaction', function(Request $request) {
     return [
         'id' => $id,
         'date' => $date,
+        'err' => $error,
+        'msg' => $message,
+    ];
+});
+
+Route::post('remove-transaction', function(Request $request) {
+    $error = 0;
+    $message = '';
+
+    if ($request->has('transaction_id') && $request->input('transaction_id')) {
+        $transaction = App\Transaction::find($request->input('transaction_id'));
+
+        $amount = $transaction->amount;
+        $type = $transaction->payment_type;
+
+        $del = $transaction->delete();
+
+        if (!$del) {
+            $error++;
+            $message = 'Error while removing transaction. Please Try again.';
+        } else {
+            $money_update = App\Money::find(1);
+
+            if ($type == 'bank') {
+                $money_update->cash_on_bank =  (float) $money_update->cash_on_bank - (float) $amount;
+            } else {
+                $money_update->cash_on_hand =  (float) $money_update->cash_on_hand - (float) $amount;
+            }
+            
+            $money_update->save();
+        }
+    } else {
+        $error++;
+        $message = 'Invalid Transaction.';
+    }
+    
+    return [
         'err' => $error,
         'msg' => $message,
     ];
