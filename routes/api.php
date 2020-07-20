@@ -691,7 +691,7 @@ Route::get('transactions', function(Request $request) {
     }])->whereHas('orders', function($order) use ($request){
         $order->where('session_id', $request->input('session_id'));
     })->with(['transactions' => function($transaction) use ($request) {
-        $transaction->where('session_id', $request->input('session_id'));
+        $transaction->where('session_id', $request->input('session_id'))->where('cash_direction', 'cash-in');
     }])->get();
     
     return $users;
@@ -706,9 +706,15 @@ Route::post('add-transaction', function(Request $request) {
     if (($request->has('user_id') && $request->input('user_id')) && ($request->has('session_id') && $request->input('session_id'))) {
         $transaction = new App\Transaction();
 
+        $type = $request->input('type');
+
         $transaction->session_id = $request->input('session_id');
         $transaction->from = $request->input('user_id');
         $transaction->amount = $request->input('amount');
+
+        if ($type) {
+            $transaction->payment_type = 'bank';
+        }
 
         $save = $transaction->save();
 
@@ -720,7 +726,11 @@ Route::post('add-transaction', function(Request $request) {
             $date = $transaction->created_at;
 
             $money_update = App\Money::find(1);
-            $money_update->cash_on_hand =  (float) $money_update->cash_on_hand + (float) $transaction->amount;
+            if ($type) {
+                $money_update->cash_on_bank =  (float) $money_update->cash_on_bank + (float) $transaction->amount;
+            } else {
+                $money_update->cash_on_hand =  (float) $money_update->cash_on_hand + (float) $transaction->amount;
+            }
             $money_update->save();
         }
     } else {
