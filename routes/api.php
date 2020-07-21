@@ -810,3 +810,22 @@ Route::post('release-money', function(Request $request) {
 Route::get('get-money', function(Request $request) {
     return App\Money::find(1);
 });
+
+Route::get('get-money-transactions', function(Request $request) {
+    $transactions = [];
+    $transaction_type = null;
+
+    if ($request->has('transaction_type') && $request->input('transaction_type')) {
+        $transaction_type = $request->input('transaction_type');
+    }
+
+    $transaction_obj = App\Transaction::orderBy('created_at', 'DESC');
+
+    if ($transaction_type) {
+        $transaction_obj->where('cash_direction', $transaction_type);
+    }
+    
+    $transactions = $transaction_obj->get();
+
+    return $transactions;
+});
