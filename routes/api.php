@@ -783,22 +783,52 @@ Route::post('remove-transaction', function(Request $request) {
     ];
 });
 
-Route::post('release-money', function(Request $request) {
+Route::post('transaction', function(Request $request) {
     $error = 0;
     $message = '';
 
     if ($request->has('amount') && $request->input('amount')) {
-        $ins = new App\Release();
+        $ins = new App\Transaction();
 
+        if ($request->has('payment_type')) {
+            $ins->payment_type = $request->input('payment_type');
+        }
+
+        if ($request->has('cash_direction')) {
+            $ins->cash_direction = $request->input('cash_direction');
+        }
+
+        $ins->session_id = 0;
+        $ins->from = 0;
         $ins->amount = $request->input('amount');
         $inserted = $ins->save();
 
         if ($inserted) {
             $money_update = App\Money::find(1);
-            $money_update->cash_on_hand =  (float) $money_update->cash_on_hand - (float) $ins->amount;
+
+            if ($ins->payment_type == 'cash') {
+                if ($ins->cash_direction == 'cash-in') {
+                    $money_update->cash_on_hand =  (float) $money_update->cash_on_hand + (float) $ins->amount;
+                } else {
+                    $money_update->cash_on_hand =  (float) $money_update->cash_on_hand - (float) $ins->amount;
+                }
+            } else {
+                if ($ins->cash_direction == 'cash-in') {
+                    $money_update->cash_on_bank =  (float) $money_update->cash_on_bank + (float) $ins->amount;
+                } else {
+                    $money_update->cash_on_bank =  (float) $money_update->cash_on_bank - (float) $ins->amount;
+                }
+            }
+
             $money_update->save();
+        } else {
+            $error++;
+            $message = 'Error while saving transaction';
         }
 
+    } else {
+        $error++;
+        $message = 'Invalid entry.';
     }
 
     return [
