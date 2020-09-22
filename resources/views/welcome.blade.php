@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta property="og:type"  content="article" />
+    <meta name="twitter:card" content="summary_large_image">
+
+    <meta name="description" content="Test Description">
+    <meta property="og:description"  content="Test Description" />
+    <meta property="og:title" content="John Mark Mancol" />
+    <meta property="og:image" content="{{ asset('images/profile.png') }}" />
+    <meta property="og:image:width" content="600" />
+    <meta property="og:image:height" content="600" />
+
     <title>Juan Marcos</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
