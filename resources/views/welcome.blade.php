@@ -7,8 +7,8 @@
     <meta property="og:type"  content="article" />
     <meta name="twitter:card" content="summary_large_image">
 
-    <meta name="description" content="Test Description">
-    <meta property="og:description"  content="Test Description" />
+    <meta name="description" content="Personal Website / Portfolio">
+    <meta property="og:description"  content="Personal Website / Portfolio" />
     <meta property="og:title" content="John Mark Mancol" />
     <meta property="og:image" content="{{ asset('images/profile.png') }}" />
     <meta property="og:image:width" content="600" />
