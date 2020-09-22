@@ -62,7 +62,7 @@
             <div class="item">
               <img src="{{ asset('images/theNinth.png') }}" alt="" />
               <div class="project-description">
-                <h4>TheNinth</h4>
+                <h4>TheNinth (2020)</h4>
                 <p>
                   An online comics / manga reading website also allows you to
                   upload your own story.
@@ -72,7 +72,7 @@
             <div class="item">
               <img src="{{ asset('images/capfrance.png') }}" alt="" />
               <div class="project-description">
-                <h4>Capfrance</h4>
+                <h4>Capfrance (2019)</h4>
                 <p>
                   Cap France is the leading operator of holiday villages for
                   associative tourism in France .
@@ -82,7 +82,7 @@
             <div class="item">
               <img src="{{ asset('images/interfaceConcept.png') }}" alt="" />
               <div class="project-description">
-                <h4>Interface Concept</h4>
+                <h4>Interface Concept (2016)</h4>
                 <p>
                   INTERFACE CONCEPT is a leader in design and manufacturing of
                   high-performance embedded boards and systems, aimed at ground,
@@ -93,7 +93,7 @@
             <div class="item">
               <img src="{{ asset('images/wearebaddies.png') }}" alt="" />
               <div class="project-description">
-                <h4>WeAreBaddies</h4>
+                <h4>WeAreBaddies (2017)</h4>
                 <p>
                   Released in 2017, We Are Baddies is a subversive ready to wear
                   clothing brand which cerebrates the French’s know how.
@@ -103,14 +103,14 @@
             <div class="item">
               <img src="{{ asset('images/ceilivtv.png') }}" alt="" />
               <div class="project-description">
-                <h4>Ceiliv TV</h4>
+                <h4>Ceiliv TV (2015)</h4>
                 <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit.</p>
               </div>
             </div>
             <div class="item">
               <img src="{{ asset('images/hydrofibi.png') }}" alt="" />
               <div class="project-description">
-                <h4>HydroFibi</h4>
+                <h4>HydroFibi (2018)</h4>
                 <p>
                   Marc Thomas, former high-level athlete and holder of a STAPS
                   pro license, uses his many years of professional experience as
@@ -121,7 +121,7 @@
             <div class="item">
               <img src="{{ asset('images/ndg.png') }}" alt="" />
               <div class="project-description">
-                <h4>NDG</h4>
+                <h4>NDG (2017)</h4>
                 <p>
                   N.D.G - for nid de guêpes*, meaning " the wasp nest " -
                   designs and produces collections meshing both american
@@ -132,14 +132,14 @@
             <div class="item">
               <img src="{{ asset('images/guichard.png') }}" alt="" />
               <div class="project-description">
-                <h4>Guichard</h4>
+                <h4>Guichard (2017)</h4>
                 <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit.</p>
               </div>
             </div>
             <div class="item">
               <img src="{{ asset('images/guichardplanning.png') }}" alt="" />
               <div class="project-description">
-                <h4>Guichard Planning</h4>
+                <h4>Guichard Planning (2017)</h4>
                 <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit.</p>
               </div>
             </div>
