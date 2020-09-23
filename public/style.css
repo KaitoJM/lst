@@ -191,7 +191,7 @@ html {
 #test.expanded {
     left: 50% !important;
     top: 100px !important;
-    width: 70vw !important;
+    width: 700px !important;
     height: auto !important;
     transform: translateX(-50%) !important;
     box-shadow: 0px 12px 20px -16px #2f2f2f;
@@ -219,7 +219,7 @@ html {
 #project-info-content {
     opacity: 0;
     transition: 0.5s;
-    width: 70vw !important;
+    width: 700px !important;
     margin-left: 50% !important;
     transform: translateX(-50%);
 }
