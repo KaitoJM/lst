@@ -4,7 +4,7 @@
         <h1>John Mark Mancol</h1>
         <p>FULL STACK WEB DEVELOPER</p>
         <p>
-        <i class="icon fas fa-map-marker-alt"></i> Amampacang, Calbayog
+        <i class="icon fas fa-map-marker-alt"></i> Calbayog
         City, Samar
         </p>
     </div>

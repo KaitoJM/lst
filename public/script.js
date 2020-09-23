@@ -24,7 +24,7 @@ jQuery(function () {
                     marginTop: $("#test").height() + 130,
                     opacity: 1,
                 });
-            }, 500);
+            }, 300);
         }, 1);
     });
 
@@ -41,7 +41,7 @@ jQuery(function () {
                 marginTop: 0,
                 opacity: 0,
             });
-        }, 500);
+        }, 300);
     });
 
     $("#project-info-content").on("click", function (e) {
